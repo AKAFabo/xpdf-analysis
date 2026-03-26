@@ -1,0 +1,60 @@
+mungeURL worries me a bit -- especially that it allows & without escaping. It
+would be better not to use system at all.
+
+actionLaunch should check with the user when opening another file.
+
+actionLaunch can execute arbitrary commands without prompting if launchCommand
+is set (e.g. if the params are "`foo`").
+
+https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=977182
+- Release process?
+- How to handle unrecognised config file options -- error or warn?
+
+Things to add to README:
+- General philosophy
+- Supported Poppler versions
+- Compiler requirement (C++11)
+  - It's actually C++14 (for make_unique) at the moment...
+  - ... and it could be C++17 (for optional) eventually
+
+Check the formatting codes are correct (e.g. error() calls).
+
+PDFCore's doc pointer should be a std::unique_ptr. (One example of many!)
+
+Maybe collapse XPDFCore and PDFCore together, since there are no other
+subclasses.
+
+XPDFViewer::cmdFullScreenMode and cmdWindowedMode are nearly identical and
+could share a helper function.
+
+Bind the back/forward mouse buttons as in web browsers.
+
+The MULTITHREADED code in GlobalParams could be redone using std::unique_lock,
+to match Poppler. (Or removed, since it's not used anyway. Removing it would
+mean we could return a const reference from  XPDFParams::getPSFile, etc.)
+
+Add "Copy selection" and, if over a link, "Copy URL" to the context menu.
+(Suggested by jidanni in Debian #547090.)
+
+Display an error dialog when opening a file fails, both from the command line
+(if an option is given, e.g. when xpdf is being invoked from a web browser) and
+from the Open dialog. (Suggested by Vincent Lefevre in Debian #931010.)
+
+Rework PDFHistory: use std::vector rather than an array?
+
+Rework XPDFTreeEntry: use std::vector or std::list rather than homebrew list?
+
+Use checked multiplications where possible (goo/GooCheckedOps.h).
+
+Add PDFCore::getDocFileName() which converts to std::string?
+
+Work out what's going on with PDFCoreTile::bitmap's ownership -- it's treated
+as an owning pointer when it's deleted but not in redrawCbk.
+
+Add configure test for libpaper, and ask Florian to remove it from
+debian/rules.
+
+Debian bug #505932 - Support selectable checkboxes
+  Unclear why this doesn't work. Poppler can render forms/annotations, but
+  AnnotAppearanceBuilder::drawFormFieldButton isn't getting called on the
+  buttons that have been ticked (!).
