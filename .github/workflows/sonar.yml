@@ -1,0 +1,42 @@
+name: SonarCloud Analysis
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential autoconf automake libtool
+
+      - name: Generate configure
+        run: autoreconf -fi
+
+      - name: Configure project
+        run: ./configure
+
+      - name: Download build-wrapper
+        run: |
+          curl -sSLo build-wrapper.zip https://sonarcloud.io/static/cpp/build-wrapper-linux-x86.zip
+          unzip build-wrapper.zip
+
+      - name: Build project
+        run: |
+          ./build-wrapper-linux-x86/build-wrapper-linux-x86-64 --out-dir bw-output make
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v2
+        with:
+          args: >
+            -Dsonar.projectKey=AKAFabo_xpdf-analysis
+            -Dsonar.organization=akafabo
+            -Dsonar.cfamily.compile-commands=bw-output/compile_commands.json
+            -Dsonar.host.url=https://sonarcloud.io
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
